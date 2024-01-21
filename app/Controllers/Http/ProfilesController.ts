@@ -22,6 +22,7 @@ export default class ProfilesController {
     if (!profile) {
       throw new NotFountException()
     }
+    return profile
   }
 
   public async store({ request, auth, response }: HttpContextContract) {
