@@ -10,10 +10,16 @@
       "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
     },
     "schemas": {
+      "id": { "type": "string", "format": "uuid" },
+      "name": { "type": "string" },
+      "preferedGenderId": { "type": "number" },
+      "genderId": { "type": "number" },
+      "description": { "type": "string" },
+      "dateOfBirth": { "type": "string" },
       "SerializedTrack": {
         "type": "object",
         "properties": {
-          "uri": { "type": "string" },
+          "uri": { "type": "string", "format": "uri" },
           "popularity": { "type": "number" },
           "name": { "type": "string" },
           "trackId": { "type": "string" },
@@ -22,12 +28,14 @@
             "type": "object",
             "properties": {
               "height": { "type": "number" },
-              "url": { "type": "string" },
+              "url": { "type": "string", "format": "uri" },
               "width": { "type": "number" }
-            }
+            },
+            "required": ["height", "url", "width"]
           },
           "artistName": { "type": "string" }
-        }
+        },
+        "required": ["uri", "popularity", "name", "trackId"]
       },
       "ProfileToShow": {
         "type": "object",
@@ -38,23 +46,24 @@
               "id": { "$ref": "#/components/schemas/User/properties/id" },
               "name": { "$ref": "#/components/schemas/User/properties/name" },
               "image": { "type": "string" }
-            }
+            },
+            "required": ["id", "name"]
           },
           "songs": { "type": "array", "items": { "$ref": "#/components/schemas/Track" } }
-        }
+        },
+        "required": ["user", "songs"]
       },
       "SerializedUser": {
         "type": "object",
         "properties": {
           "id": { "type": "string" },
           "name": { "type": "string" },
-          "email": { "type": "string" },
           "dateOfBirth": { "type": "string", "format": "date-time" },
           "description": { "type": "string" },
-          "avatarUrl": { "type": "string" },
-          "genderId": { "type": "string" },
-          "preferedGenderId": { "type": "string" }
-        }
+          "genderId": { "type": "number" },
+          "preferedGenderId": { "type": "number" }
+        },
+        "required": ["id", "name", "dateOfBirth", "genderId", "preferedGenderId"]
       },
       "Gender": {
         "type": "object",
@@ -63,17 +72,20 @@
           "name": { "type": "string" },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" }
-        }
+        },
+        "required": ["id", "name", "createdAt", "updatedAt"]
       },
-      "Match": {
+      "Image": {
         "type": "object",
         "properties": {
           "id": { "type": "string" },
-          "createdAt": { "type": "string", "format": "date-time" },
-          "updatedAt": { "type": "string", "format": "date-time" },
-          "matcherUserId": { "type": "string" },
-          "matchedUserId": { "type": "string" }
-        }
+          "type": { "type": "string", "enum": ["avatar"] },
+          "fileName": { "type": "string" },
+          "height": { "type": "number" },
+          "width": { "type": "number" },
+          "userId": { "type": "string" }
+        },
+        "required": ["id", "type", "fileName", "userId"]
       },
       "MatchRequest": {
         "type": "object",
@@ -83,7 +95,19 @@
           "updatedAt": { "type": "string", "format": "date-time" },
           "matcherUserId": { "type": "string" },
           "matchedUserId": { "type": "string" }
-        }
+        },
+        "required": ["id", "createdAt", "updatedAt", "matcherUserId", "matchedUserId"]
+      },
+      "Match": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "matcherUserId": { "type": "string" },
+          "matchedUserId": { "type": "string" }
+        },
+        "required": ["id", "createdAt", "updatedAt", "matcherUserId", "matchedUserId"]
       },
       "Profile": {
         "type": "object",
@@ -93,10 +117,19 @@
           "description": { "type": "string" },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" },
-          "preferedGender": { "type": "number" },
-          "gender": { "type": "number" },
+          "preferedGenderId": { "type": "number" },
+          "genderId": { "type": "number" },
           "userId": { "type": "string" }
-        }
+        },
+        "required": [
+          "id",
+          "dateOfBirth",
+          "createdAt",
+          "updatedAt",
+          "preferedGenderId",
+          "genderId",
+          "userId"
+        ]
       },
       "Track": {
         "type": "object",
@@ -104,13 +137,14 @@
           "id": { "type": "string" },
           "name": { "type": "string" },
           "albumName": { "type": "string" },
-          "spotifyUri": { "type": "string" },
-          "spotifyImage": { "type": "string" },
+          "spotifyUri": { "type": "string", "format": "uri" },
+          "spotifyImage": { "type": "string", "format": "uri" },
           "spotifyId": { "type": "string" },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" },
           "userId": { "type": "string" }
-        }
+        },
+        "required": ["id", "createdAt", "updatedAt", "userId"]
       },
       "User": {
         "type": "object",
@@ -121,10 +155,59 @@
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" },
           "profileId": { "type": "string" }
-        }
+        },
+        "required": ["id", "name", "email", "createdAt", "updatedAt"]
       }
     },
     "responses": {
+      "BadRequestException": {
+        "description": "Bad Request Exception",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string", "example": "BAD_REQUEST" },
+                      "code": { "type": "string", "example": "BAD_REQUEST" }
+                    },
+                    "required": ["message", "code"]
+                  }
+                }
+              },
+              "required": ["errors"]
+            }
+          }
+        }
+      },
+      "ForbiddenException": {
+        "description": "Forbidden Exception",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string", "example": "FORBIDDEN" },
+                      "code": { "type": "string", "example": "FORBIDDEN" }
+                    },
+                    "required": ["message", "code"]
+                  }
+                }
+              },
+              "required": ["errors"]
+            }
+          }
+        }
+      },
       "NotFountException": {
         "description": "Not Fount Exception",
         "content": {
@@ -137,11 +220,38 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "message": { "type": "string", "example": "NOT_FOUND: NOT_FOUND" }
-                    }
+                      "message": { "type": "string", "example": "NOT_FOUND" },
+                      "code": { "type": "string", "example": "NOT_FOUND" }
+                    },
+                    "required": ["message", "code"]
                   }
                 }
-              }
+              },
+              "required": ["errors"]
+            }
+          }
+        }
+      },
+      "TechnicalException": {
+        "description": "Technical Exception",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string", "example": "TECHNICAL_ERROR" },
+                      "code": { "type": "string", "example": "TECHNICAL_ERROR" }
+                    },
+                    "required": ["message", "code"]
+                  }
+                }
+              },
+              "required": ["errors"]
             }
           }
         }
@@ -158,14 +268,14 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "message": {
-                        "type": "string",
-                        "example": "E_UNAUTHORIZED_ACCESS: Unauthorized access"
-                      }
-                    }
+                      "message": { "type": "string", "example": "Unauthorized access" },
+                      "code": { "type": "string", "example": "E_UNAUTHORIZED_ACCESS" }
+                    },
+                    "required": ["message", "code"]
                   }
                 }
-              }
+              },
+              "required": ["errors"]
             }
           }
         }
@@ -192,11 +302,13 @@
                         "properties": {
                           "id": { "$ref": "#/components/schemas/User/properties/id" },
                           "name": { "$ref": "#/components/schemas/User/properties/name" }
-                        }
+                        },
+                        "required": ["id", "name"]
                       }
                     },
                     "message": { "type": "string", "example": "Mutual match history" }
-                  }
+                  },
+                  "required": ["data", "message"]
                 }
               }
             }
@@ -209,7 +321,28 @@
       "get": {
         "summary": "get user spotify top five tracks",
         "security": [{ "bearerAuth": [] }],
-        "tags": ["Match"],
+        "tags": ["Spotify"],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/SerializedTrack" }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnAuthorizedException" }
+        }
+      }
+    },
+    "/api/spotify/track-by-name": {
+      "get": {
+        "summary": "get user spotify top five tracks",
+        "security": [{ "bearerAuth": [] }],
+        "tags": ["Spotify"],
         "responses": {
           "200": {
             "description": "Success",
@@ -217,13 +350,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "items": { "$ref": "#/components/schemas/SerializedTrack" },
                   "properties": {
                     "data": {
                       "type": "array",
                       "items": { "$ref": "#/components/schemas/SerializedTrack" }
                     }
-                  }
+                  },
+                  "required": ["data"]
                 }
               }
             }
@@ -255,7 +388,8 @@
                   "type": "object",
                   "properties": {
                     "message": { "type": "string", "example": "It's a mutual match" }
-                  }
+                  },
+                  "required": ["message"]
                 }
               }
             }
@@ -281,7 +415,8 @@
                       "type": "array",
                       "items": { "$ref": "#/components/schemas/ProfileToShow" }
                     }
-                  }
+                  },
+                  "required": ["data"]
                 }
               }
             }
@@ -290,8 +425,12 @@
         }
       }
     },
+    "/api/auth/spotify": {
+      "get": { "tags": ["Spotify OAuth"], "responses": { "200": { "description": "Success" } } }
+    },
     "/api/auth/logout": {
       "get": {
+        "operationId": "logout",
         "security": [{ "bearerAuth": [] }],
         "tags": ["Auth"],
         "responses": {
@@ -302,6 +441,7 @@
     },
     "/api/auth/profile": {
       "get": {
+        "operationId": "getProfile",
         "security": [{ "bearerAuth": [] }],
         "tags": ["Auth"],
         "responses": {
@@ -315,8 +455,40 @@
         }
       },
       "post": {
+        "operationId": "createProfile",
         "security": [{ "bearerAuth": [] }],
         "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "$ref": "#/components/schemas/Profile/properties/name" },
+                  "dateOfBirth": { "$ref": "#/components/schemas/Profile/properties/dateOfBirth" },
+                  "description": { "$ref": "#/components/schemas/Profile/properties/description" },
+                  "preferedGenderId": {
+                    "$ref": "#/components/schemas/Profile/properties/preferedGenderId"
+                  },
+                  "genderId": { "$ref": "#/components/schemas/Profile/properties/genderId" },
+                  "trackIds": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/Track/properties/id" }
+                  }
+                },
+                "required": [
+                  "name",
+                  "dateOfBirth",
+                  "description",
+                  "preferedGenderId",
+                  "genderId",
+                  "trackIds"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Success",
@@ -330,8 +502,26 @@
     },
     "/api/auth/profile/avatar": {
       "post": {
+        "operationId": "uploadAvatar",
         "security": [{ "bearerAuth": [] }],
         "tags": ["Auth"],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "avatar": {
+                    "description": "Image file to upload as the user's avatar",
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": ["avatar"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Success",
@@ -341,10 +531,21 @@
           },
           "401": { "$ref": "#/components/responses/UnAuthorizedException" }
         }
+      },
+      "get": {
+        "operationId": "getAvatar",
+        "summary": "Get user avatar image",
+        "security": [{ "bearerAuth": [] }],
+        "tags": ["Auth"],
+        "responses": {
+          "200": {
+            "description": "Returns the user avatar image",
+            "content": { "image/jpeg": { "schema": { "type": "string", "format": "binary" } } }
+          },
+          "401": { "$ref": "#/components/responses/UnAuthorizedException" },
+          "404": { "$ref": "#/components/responses/NotFountException" }
+        }
       }
-    },
-    "/api/auth/spotify": {
-      "get": { "tags": ["Spotify OAuth"], "responses": { "200": { "description": "Success" } } }
     }
   },
   "tags": []

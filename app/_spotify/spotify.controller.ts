@@ -1,11 +1,7 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import SpotifyService from 'App/_spotify/spotify.service'
 import { inject } from '@adonisjs/fold'
-import {
-  FetchTracksByNameResponse,
-  MappedTrack,
-} from 'App/_spotify/beans/FetchTracksByNameResponse'
-import { SpotifySearchTrackResponse } from 'App/_spotify/beans/SpotifySearchTrackResponse'
+import SpotifyService from './spotify.service.js'
+import { HttpContext } from '@adonisjs/core/http'
+import { TrackObject } from '#api/spotify/api/api'
 
 @inject()
 export default class SpotifyController {
@@ -20,6 +16,7 @@ export default class SpotifyController {
    *      properties:
    *        uri:
    *          type: string
+   *          format: uri
    *        popularity:
    *          type: number
    *        name:
@@ -35,20 +32,30 @@ export default class SpotifyController {
    *              type: number
    *            url:
    *              type: string
+   *              format: uri
    *            width:
    *              type: number
+   *          required:
+   *            - height
+   *            - url
+   *            - width
    *        artistName:
    *          type: string
+   *      required:
+   *        - uri
+   *        - popularity
+   *        - name
+   *        - trackId
    */
-  private serializeTrack(track: SpotifySearchTrackResponse['tracks']['items'][0]) {
+  private serializeTrack(track: TrackObject) {
     const artistNames = track.artists?.map((artist) => artist.name).join(', ')
     return {
       uri: track.uri,
       popularity: track.popularity,
       name: track.name,
       trackId: track.id,
-      album: track?.album?.name,
-      image: track?.album?.images?.[0],
+      album: track.album?.name,
+      image: track.album?.images?.[0],
       artistName: artistNames,
     }
   }
@@ -61,7 +68,7 @@ export default class SpotifyController {
    *    security:
    *      - bearerAuth: []
    *    tags:
-   *      - Match
+   *      - Spotify
    *    responses:
    *      401:
    *        $ref: '#/components/responses/UnAuthorizedException'
@@ -74,8 +81,8 @@ export default class SpotifyController {
    *              items:
    *                $ref: '#/components/schemas/SerializedTrack'
    */
-  public async getTopFiveTracks({ auth }: HttpContextContract) {
-    const user = await auth.authenticate()
+  async getTopFiveTracks({ auth }: HttpContext) {
+    const user = auth.getUserOrFail()
     const userId = user.id
     const topTracks = await this.spotifyService.getTracks(userId)
     return topTracks?.map((track) => {
@@ -85,13 +92,13 @@ export default class SpotifyController {
 
   /**
    * @swagger
-   * /api/spotify/top-five-tracks:
+   * /api/spotify/track-by-name:
    *  get:
    *    summary: get user spotify top five tracks
    *    security:
    *      - bearerAuth: []
    *    tags:
-   *      - Match
+   *      - Spotify
    *    responses:
    *      401:
    *        $ref: '#/components/responses/UnAuthorizedException'
@@ -106,18 +113,17 @@ export default class SpotifyController {
    *                  type: array
    *                  items:
    *                    $ref: '#/components/schemas/SerializedTrack'
+   *              required:
+   *                - data
    */
-  public async getTrackByName({
-    request,
-    auth,
-  }: HttpContextContract): Promise<FetchTracksByNameResponse> {
-    const user = await auth.authenticate()
+  async getTrackByName({ request, auth }: HttpContext) {
+    const user = auth.getUserOrFail()
     const userId = user.id
     const { name } = request.qs()
 
     const tracks = await this.spotifyService.getTracksByName(userId, name)
 
-    const mappedTracks: MappedTrack[] = tracks.map((track) => {
+    const mappedTracks = tracks.map((track) => {
       return this.serializeTrack(track)
     })
 

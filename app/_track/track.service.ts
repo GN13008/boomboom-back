@@ -1,40 +1,37 @@
-import Track from 'App/Models/Track'
 import { inject } from '@adonisjs/fold'
-import User from 'App/Models/User'
-import { SpotifySearchTrackResponse } from 'App/_spotify/beans/SpotifySearchTrackResponse'
+import User from '#models/user'
+import Track from '#models/track'
+import { TrackObject } from '#api/spotify/api/api'
 
 @inject()
 export default class TrackService {
-  public async saveTracks(
-    userId: User['id'],
-    tracks: SpotifySearchTrackResponse['tracks']['items']
-  ) {
+  async saveTracks(userId: User['id'], tracks: TrackObject[]) {
     for (let track of tracks) {
       const newTrack = new Track()
       newTrack.name = track.name
       newTrack.spotifyId = track.id
-      newTrack.spotifyImage = track.href ?? track.album.href
+      newTrack.spotifyImage = track.album?.images[0].url
       newTrack.spotifyUri = track.uri
-      newTrack.albumName = track.album.name
+      newTrack.albumName = track.album?.name
       newTrack.userId = userId
       await newTrack.save()
     }
   }
 
-  public getTracksData(tracks) {
+  getTracksData(tracks: Track[]) {
     const mappdTracks = tracks?.map((track) => {
       return {
-        popularity: track.popularity,
+        // popularity: track.popularity,
         name: track.name,
         trackId: track.id,
-        album: track?.albun?.name,
+        // album: track?.albun?.name,
       }
     })
 
     return mappdTracks
   }
 
-  public async updateFavorityTrack(userId, trackIds) {
+  async updateFavorityTrack(userId: User['id'], trackIds: Track['id'][]) {
     // TODO ??
     const markFavorite = await Track.query()
       .where('user_id', userId)
